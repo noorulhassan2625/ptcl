@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digit Swap Calculator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 70%;
+            font-size: 16px;
+        }
+
+        .header button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .header button:hover {
+            background-color: #0056b3;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .box {
+            flex: 1;
+            min-width: 300px;
+            max-width: 30%;
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .box h2 {
+            margin-bottom: 10px;
+        }
+
+        .box .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            line-height: 25px;
+        }
+
+        .box .close-button:hover {
+            background-color: #e60000;
+        }
+
+        .list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+            text-align: left;
+            padding: 0 10px;
+        }
+
+        .list p {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 768px) {
+            .header input {
+                width: 60%;
+            }
+
+            .box {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <input type="text" id="digitInput" maxlength="4" placeholder="Enter a 4-digit number">
+            <button onclick="calculateSwaps()">Result Button</button>
+        </div>
+
+        <div class="row" id="listContainer">
+            <!-- Dynamic lists will be appended here -->
+        </div>
+
+        <div class="box" id="mainListBox">
+            <h2>Main List (9999)</h2>
+            <div class="list" id="mainList">
+                <!-- Remaining numbers will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let historyData = [];
+        const mainSet = new Set(Array.from({ length: 9999 }, (_, i) => i + 1));
+
+        function calculateSwaps() {
+            const input = document.getElementById('digitInput').value;
+
+            // Validate input
+            if (!/^[0-9]{4}$/.test(input)) {
+                alert('Please enter a valid 4-digit number.');
+                return;
+            }
+
+            const digits = input.split('');
+            const results = new Set();
+
+            // Generate all 24 permutations of the 4 digits
+            function permute(array, startIndex) {
+                if (startIndex === array.length - 1) {
+                    results.add(array.join(''));
+                    return;
+                }
+
+                for (let i = startIndex; i < array.length; i++) {
+                    [array[startIndex], array[i]] = [array[i], array[startIndex]]; // Swap
+                    permute(array, startIndex + 1);
+                    [array[startIndex], array[i]] = [array[i], array[startIndex]]; // Swap back
+                }
+            }
+
+            permute(digits, 0);
+
+            // Get the permutations
+            const resultArray = Array.from(results).map(Number);
+
+            // Subtract from the main set
+            resultArray.forEach(num => mainSet.delete(num));
+
+            // Store the results
+            historyData.push({ input, resultArray });
+
+            // Update the UI
+            updateUI();
+        }
+
+        function updateUI() {
+            const listContainer = document.getElementById('listContainer');
+            listContainer.innerHTML = '';
+
+            historyData.forEach((data, index) => {
+                const newBox = document.createElement('div');
+                newBox.className = 'box';
+                newBox.innerHTML = `
+                    <button class="close-button" onclick="hideList(this)">X</button>
+                    <h2>List ${index + 1} (Input: ${data.input})</h2>
+                    <p>24 Numbers Generated:</p>
+                    <div class="list">
+                        ${data.resultArray.map(num => `<p>${num}</p>`).join('')}
+                    </div>
+                `;
+                listContainer.appendChild(newBox);
+            });
+
+            // Update main list
+            const mainList = document.getElementById('mainList');
+            mainList.innerHTML = Array.from(mainSet).map(num => `<p>${num}</p>`).join('');
+
+            // Clear input field
+            document.getElementById('digitInput').value = '';
+        }
+
+        function hideList(button) {
+            const box = button.parentElement;
+            box.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
