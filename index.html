@@ -102,6 +102,13 @@
             margin-top: 20px;
         }
 
+        /* Responsive Table */
+        .table-container {
+            overflow-x: auto;
+            width: 100%;
+            margin-top: 10px;
+        }
+
         .table {
             width: 100%;
             border-collapse: collapse;
@@ -112,15 +119,12 @@
             border: 1px solid #ccc;
             padding: 8px;
             text-align: center;
+            word-wrap: break-word;
         }
 
         .table th {
             background-color: #f1f1f1;
             font-weight: bold;
-        }
-
-        .table td {
-            word-wrap: break-word;
         }
 
         /* Scroll to Top Button */
@@ -154,6 +158,11 @@
 
             .box {
                 min-width: 100%;
+            }
+
+            .table th, .table td {
+                font-size: 14px;
+                padding: 6px;
             }
         }
     </style>
@@ -261,14 +270,16 @@
                 .join('');
 
             mainList.innerHTML = `
-                <table class="table">
-                    <thead>
-                        <tr><th colspan="10">Main List</th></tr>
-                    </thead>
-                    <tbody>
-                        ${tableRows}
-                    </tbody>
-                </table>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr><th colspan="10">Main List</th></tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
             `;
 
             const mainListTitle = document.getElementById('mainListTitle');
@@ -287,8 +298,12 @@
         }
 
         window.addEventListener('scroll', () => {
-            const scrollToTopButton = document.getElementById('scrollToTop');
-            scrollToTopButton.style.display = window.scrollY > 300 ? 'flex' : 'none';
+            const scrollToTopBtn = document.getElementById('scrollToTop');
+            if (window.scrollY > 200) {
+                scrollToTopBtn.style.display = 'block';
+            } else {
+                scrollToTopBtn.style.display = 'none';
+            }
         });
     </script>
 </body>
